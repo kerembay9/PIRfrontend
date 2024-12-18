@@ -6,7 +6,7 @@ import { useState, useEffect, Suspense } from "react"; // Import Suspense
 import Loading from "./loading"; // You can create a separate Loading component
 
 export default function ResultsPage() {
-  const API_URL = "http://13.60.250.133:5000"; // Replace with your actual API endpoint
+  const API_URL = "https://cs533.hm-rdp.com"; // Replace with your actual API endpoint
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
