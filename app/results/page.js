@@ -14,6 +14,7 @@ export default function ResultsPage() {
   const [results, setResults] = useState([]); // State for storing search results
   const [loading, setLoading] = useState(false); // State for loading status
   const [error, setError] = useState(null); // State for any error during API call
+  const [activeTab, setActiveTab] = useState(""); // State for active tab
 
   // Fetch search results from API
   useEffect(() => {
@@ -21,19 +22,42 @@ export default function ResultsPage() {
       setLoading(true); // Start loading when a search query is present
       setError(null); // Reset any previous errors
 
-      // Fetch results from the API endpoint
-      fetch(`${API_URL}/query?search=${query}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setResults(data.results); // Assuming API response is { results: [...] }
-          setLoading(false); // Set loading to false after data is fetched
-        })
-        .catch((err) => {
-          setError("Failed to fetch results. Please try again later.");
+      // Test data for generating dummy queries
+      const dataGenerateDummyQueries = {
+        input_query: query,
+        num_queries: 3,
+      };
+
+      // Function to call the generate-dummy-queries endpoint
+      const fetchDummyQueries = async () => {
+        try {
+          const response = await fetch(`${API_URL}/generate-dummy-queries`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dataGenerateDummyQueries),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setResults(data); // Set all the results including all_queries and result
+            setActiveTab(data.input_category); // Set the active tab based on the input category
+            setLoading(false); // Set loading to false after data is fetched
+          } else {
+            setError("Failed to fetch dummy queries. Please try again later.");
+            setLoading(false);
+          }
+        } catch (err) {
+          setError("Failed to fetch dummy queries. Please try again later.");
           setLoading(false); // Stop loading even if there's an error
-        });
+        }
+      };
+
+      // Fetch data from the API for dummy queries
+      fetchDummyQueries();
     }
-  }, [query]); // Re-fetch when the query changes
+  }, [query]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -44,6 +68,25 @@ export default function ResultsPage() {
     if (e.key === "Enter") {
       handleSearch(e); // Trigger the search if Enter key is pressed
     }
+  };
+
+  const renderResults = (category) => {
+    if (results.result && results.result[category]) {
+      return results.result[category].map((result, index) => (
+        <div key={index} className="mb-4">
+          <a
+            href={result.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            <h3 className="text-xl font-bold">{result.title}</h3>
+          </a>
+          <p className="text-gray-600">{result.url}</p>
+        </div>
+      ));
+    }
+    return <p>No results found for this category: {category}</p>;
   };
 
   return (
@@ -71,6 +114,27 @@ export default function ResultsPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      {results.all_queries && (
+        <div className="tabs-container my-4">
+          <ul className="flex space-x-4">
+            {results.all_queries.map((query, index) => (
+              <li
+                key={index}
+                onClick={() => setActiveTab(query.query)}
+                className={`cursor-pointer py-2 px-4 border-b-2 ${
+                  activeTab === query.category
+                    ? "border-blue-500 text-blue-500"
+                    : "border-transparent text-gray-600 hover:border-blue-500"
+                }`}
+              >
+                {query.query}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Search Results */}
       {loading && <Loading />}
       {!loading && (
@@ -79,28 +143,9 @@ export default function ResultsPage() {
             Search results for: {query}
           </h2>
 
-          {/* Display error message if the API fetch failed */}
           {error && <p className="text-red-600">{error}</p>}
 
-          {/* Display the search results */}
-          {!loading && !error && results.length === 0 && (
-            <p>No results found for &quot;{query}&quot;.</p>
-          )}
-
-          {/* Map through the results and display them */}
-          {results.map((result, index) => (
-            <div key={index} className="mb-4">
-              <a
-                href={result.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                <h3 className="text-xl font-bold">{result.title}</h3>
-              </a>
-              <p className="text-gray-600">{result.link}</p>
-            </div>
-          ))}
+          {results.all_queries && activeTab && renderResults(activeTab)}
         </div>
       )}
     </div>
