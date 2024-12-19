@@ -116,7 +116,7 @@ export default function ResultsPage() {
 
       {/* Tabs */}
       {results.all_queries && (
-        <div className="tabs-container my-4">
+        <div className="tabs-container my-4 ml-5 px-4">
           <ul className="flex space-x-4">
             {results.all_queries.map((query, index) => (
               <li
@@ -139,10 +139,6 @@ export default function ResultsPage() {
       {loading && <Loading />}
       {!loading && (
         <div className="max-w-4xl justify-start ml-5 px-4 py-8">
-          <h2 className="text-2xl font-semibold mb-4">
-            Search results for: {query}
-          </h2>
-
           {error && <p className="text-red-600">{error}</p>}
 
           {results.all_queries && activeTab && renderResults(activeTab)}
