@@ -63,7 +63,7 @@ export default function Home() {
       <div className="min-h-screen  flex flex-col items-center mt-40 ">
         <Link href="/" className=" flex flex-col items-center">
           <img src="logo.png" alt="ABCGPT" className="w-40" />
-          <h1 className="text-3xl font-bold mb-6 flex items-center space-x-2">
+          <h1 className="text-3xl font-bold mb-6 flex items-center space-x-2 text-black">
             <span>{scrambledText}</span>
           </h1>
         </Link>
